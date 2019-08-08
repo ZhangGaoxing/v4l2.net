@@ -64,7 +64,7 @@ namespace System.Device.Media
         /// <param name="path">Picture save path</param>
         public override void Capture(string path)
         {
-            SetCaptureSettings();
+            SetVideoConnectionSettings();
             byte[] dataBuffer = ProcessCaptureData();
 
             using FileStream fs = new FileStream(path, FileMode.Create);
@@ -78,7 +78,7 @@ namespace System.Device.Media
         /// <returns>Picture stream</returns>
         public override MemoryStream Capture()
         {
-            SetCaptureSettings();
+            SetVideoConnectionSettings();
             byte[] dataBuffer = ProcessCaptureData();
 
             return new MemoryStream(dataBuffer);
@@ -232,8 +232,10 @@ namespace System.Device.Media
             return dataBuffer;
         }
 
-        private unsafe void SetCaptureSettings()
+        private unsafe void SetVideoConnectionSettings()
         {
+            FillVideoConnectionSettings();
+
             // Set capture format
             v4l2_format format;
             if (Settings.CaptureSize == (0, 0))
@@ -270,6 +272,7 @@ namespace System.Device.Media
             }
             V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
 
+            
             // Set exposure type
             v4l2_control ctrl = new v4l2_control
             {
@@ -283,6 +286,79 @@ namespace System.Device.Media
             ctrl.id = VideoDeviceValueType.ExposureTime;
             ctrl.value = Settings.ExposureTime;
             V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set brightness
+            ctrl.id = VideoDeviceValueType.Brightness;
+            ctrl.value = Settings.Brightness;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set contrast
+            ctrl.id = VideoDeviceValueType.Contrast;
+            ctrl.value = Settings.Contrast;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set saturation
+            ctrl.id = VideoDeviceValueType.Saturation;
+            ctrl.value = Settings.Saturation;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set sharpness
+            ctrl.id = VideoDeviceValueType.Sharpness;
+            ctrl.value = Settings.Sharpness;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set horizontal flip
+            ctrl.id = VideoDeviceValueType.HorizontalFlip;
+            ctrl.value = Settings.HorizontalFlip ? 1 : 0;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set vertical flip
+            ctrl.id = VideoDeviceValueType.VerticalFlip;
+            ctrl.value = Settings.VerticalFlip ? 1 : 0;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+        }
+
+        private void FillVideoConnectionSettings()
+        {
+            if (Settings.ExposureType.Equals(default))
+            {
+                Settings.ExposureType = (ExposureType)GetVideoDeviceValue(VideoDeviceValueType.ExposureType).DefaultValue;
+            }
+
+            if (Settings.ExposureTime.Equals(default))
+            {
+                Settings.ExposureTime = GetVideoDeviceValue(VideoDeviceValueType.ExposureTime).DefaultValue;
+            }
+
+            if (Settings.Brightness.Equals(default))
+            {
+                Settings.Brightness = GetVideoDeviceValue(VideoDeviceValueType.Brightness).DefaultValue;
+            }
+
+            if (Settings.Saturation.Equals(default))
+            {
+                Settings.Saturation = GetVideoDeviceValue(VideoDeviceValueType.Saturation).DefaultValue;
+            }
+
+            if (Settings.Sharpness.Equals(default))
+            {
+                Settings.Sharpness = GetVideoDeviceValue(VideoDeviceValueType.Sharpness).DefaultValue;
+            }
+
+            if (Settings.Contrast.Equals(default))
+            {
+                Settings.Contrast = GetVideoDeviceValue(VideoDeviceValueType.Contrast).DefaultValue;
+            }
+
+            if (Settings.HorizontalFlip.Equals(default))
+            {
+                Settings.HorizontalFlip = Convert.ToBoolean(GetVideoDeviceValue(VideoDeviceValueType.HorizontalFlip).DefaultValue);
+            }
+
+            if (Settings.VerticalFlip.Equals(default))
+            {
+                Settings.VerticalFlip = Convert.ToBoolean(GetVideoDeviceValue(VideoDeviceValueType.VerticalFlip).DefaultValue);
+            }
         }
 
         private void Initialize()

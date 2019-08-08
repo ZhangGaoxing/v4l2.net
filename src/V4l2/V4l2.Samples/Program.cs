@@ -11,7 +11,9 @@ namespace V4l2.Samples
             {
                 CaptureSize = (2560, 1920),
                 PixelFormat = PixelFormat.JPEG,
-                ExposureType = ExposureType.Auto
+                ExposureType = ExposureType.Auto,
+                HorizontalFlip = true,
+                VerticalFlip = true,
             };
             using VideoDevice device = VideoDevice.Create(settings);
 
