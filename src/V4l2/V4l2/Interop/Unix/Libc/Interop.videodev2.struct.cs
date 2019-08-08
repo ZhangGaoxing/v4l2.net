@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Drawing;
 using System.Runtime.InteropServices;
 
 internal struct V4l2FrameBuffer
@@ -21,6 +20,13 @@ internal struct v4l2_capability
     public uint capabilities;
     [MarshalAs(UnmanagedType.ByValArray, SizeConst = 4)]
     public uint[] reserved;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct v4l2_control
+{
+    public uint id;
+    public int value;
 }
 
 [StructLayout(LayoutKind.Sequential)]
@@ -284,4 +290,41 @@ internal struct v4l2_buffer
     public uint length;
     public uint input;
     public uint reserved;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct v4l2_frmsizeenum
+{
+    public uint index;
+    public uint pixel_format;
+    public v4l2_frmsizetypes type;
+    public v4l2_frmsize_discrete discrete;
+    public v4l2_frmsize_stepwise stepwise;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+    public uint[] reserved;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct v4l2_frmsize_discrete
+{
+    public uint width;
+    public uint height;
+}
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct v4l2_frmsize_stepwise
+{
+    public uint min_width;
+    public uint max_width;
+    public uint step_width;
+    public uint min_height;
+    public uint max_height;
+    public uint step_height;
+};
+
+internal enum v4l2_frmsizetypes : uint
+{
+    V4L2_FRMSIZE_TYPE_DISCRETE = 1,
+    V4L2_FRMSIZE_TYPE_CONTINUOUS = 2,
+    V4L2_FRMSIZE_TYPE_STEPWISE = 3,
 }

@@ -13,7 +13,9 @@ namespace System.Device.Media
 
         public abstract MemoryStream Capture();
 
-        public abstract List<PixelFormat> GetSupportedPixelFormat();
+        public abstract List<PixelFormat> GetSupportedPixelFormats();
+
+        public abstract List<(uint Width, uint Height)> GetPixelFormatResolutions(PixelFormat format);
 
         public void Dispose()
         {

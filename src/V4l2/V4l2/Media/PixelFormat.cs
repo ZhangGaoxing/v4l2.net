@@ -209,10 +209,11 @@ namespace System.Device.Media
         D4XX = 1482175556,
     }
 
-    public class RawPixelFormat
+    /// <summary>
+    /// videodev2.h Pixel Format Definition
+    /// </summary>
+    internal class RawPixelFormat
     {
-        // videodev2.h
-
         public static void PrintFields()
         {
             Type type = typeof(RawPixelFormat);

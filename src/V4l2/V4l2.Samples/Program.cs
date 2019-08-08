@@ -9,14 +9,20 @@ namespace V4l2.Samples
         {
             VideoConnectionSettings settings = new VideoConnectionSettings(0)
             {
-                CaptureSize = (1280, 768),
+                CaptureSize = (2560, 1920),
                 PixelFormat = PixelFormat.JPEG
             };
             using VideoDevice device = VideoDevice.Create(settings);
 
-            foreach (var item in device.GetSupportedPixelFormat())
+            foreach (var item in device.GetSupportedPixelFormats())
             {
                 Console.Write($"{item} ");
+            }
+            Console.WriteLine();
+
+            foreach (var item in device.GetPixelFormatResolutions(PixelFormat.YUYV))
+            {
+                Console.Write($"{item.Width}x{item.Height} ");
             }
             Console.WriteLine();
 

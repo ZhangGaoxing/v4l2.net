@@ -86,7 +86,7 @@ namespace System.Device.Media
             return new MemoryStream(dataBuffer);
         }
 
-        public override List<PixelFormat> GetSupportedPixelFormat()
+        public override List<PixelFormat> GetSupportedPixelFormats()
         {
             v4l2_fmtdesc fmtdesc = new v4l2_fmtdesc
             {
@@ -99,6 +99,24 @@ namespace System.Device.Media
             {
                 result.Add((PixelFormat)fmtdesc.pixelformat);
                 fmtdesc.index++;
+            }
+
+            return result;
+        }
+
+        public override List<(uint Width, uint Height)> GetPixelFormatResolutions(PixelFormat format)
+        {
+            v4l2_frmsizeenum size = new v4l2_frmsizeenum()
+            {
+                index = 0,
+                pixel_format = (uint)format
+            };
+
+            List<(uint Width, uint Height)> result = new List<(uint Width, uint Height)>();
+            while (V4l2Struct(VideoSettings.VIDIOC_ENUM_FRAMESIZES, ref size) != -1)
+            {
+                result.Add((size.discrete.width, size.discrete.height));
+                size.index++;
             }
 
             return result;
@@ -145,7 +163,7 @@ namespace System.Device.Media
 
             // Start data stream
             v4l2_buf_type type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE;
-            Interop.ioctl(_deviceFileDescriptor, VideoSettings.VIDIOC_STREAMON, new IntPtr(&type));
+            Interop.ioctl(_deviceFileDescriptor, (int)VideoSettings.VIDIOC_STREAMON, new IntPtr(&type));
 
             // Get one frame from the buffer
             v4l2_buffer frame = new v4l2_buffer
@@ -164,7 +182,13 @@ namespace System.Device.Media
             V4l2Struct(VideoSettings.VIDIOC_QBUF, ref frame);
 
             // Close data stream
-            Interop.ioctl(_deviceFileDescriptor, VideoSettings.VIDIOC_STREAMOFF, new IntPtr(&type));
+            Interop.ioctl(_deviceFileDescriptor, (int)VideoSettings.VIDIOC_STREAMOFF, new IntPtr(&type));
+
+            // Unmapping the applied buffer to user space
+            for (uint i = 0; i < BufferCount; i++)
+            {
+                Interop.munmap(buffers[i].Start, (int)buffers[i].Length);
+            }
 
             return dataBuffer;
         }
@@ -234,13 +258,13 @@ namespace System.Device.Media
             V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
         }
 
-        private int V4l2Struct<T>(int request, ref T @struct)
+        private int V4l2Struct<T>(VideoSettings request, ref T @struct)
             where T : struct
         {
             IntPtr ptr = Marshal.AllocHGlobal(Marshal.SizeOf(@struct));
             Marshal.StructureToPtr(@struct, ptr, true);
 
-            int result = Interop.ioctl(_deviceFileDescriptor, request, ptr);
+            int result = Interop.ioctl(_deviceFileDescriptor, (int)request, ptr);
             @struct = Marshal.PtrToStructure<T>(ptr);
 
             return result;
