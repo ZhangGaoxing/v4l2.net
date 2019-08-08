@@ -25,7 +25,7 @@ internal struct v4l2_capability
 [StructLayout(LayoutKind.Sequential)]
 internal struct v4l2_control
 {
-    public uint id;
+    public V4l2Control id;
     public int value;
 }
 

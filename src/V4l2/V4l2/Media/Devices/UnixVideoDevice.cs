@@ -68,7 +68,7 @@ namespace System.Device.Media
             Initialize();
         }
 
-        public override void Capture(string path)
+        public override unsafe void Capture(string path)
         {
             SetCaptureSettings();
             byte[] dataBuffer = ProcessCaptureData();
@@ -256,6 +256,20 @@ namespace System.Device.Media
                 };
             }
             V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
+
+            // Set exposure type
+            v4l2_control ctrl = new v4l2_control
+            {
+                id = V4l2Control.V4L2_CID_EXPOSURE_AUTO,
+                value = (int)_settings.ExposureType
+            };
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set exposure time
+            // If exposure type is auto, this field is invalid
+            ctrl.id = V4l2Control.V4L2_CID_EXPOSURE_ABSOLUTE;
+            ctrl.value = _settings.ExposureTime;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
         }
 
         private int V4l2Struct<T>(VideoSettings request, ref T @struct)

@@ -7,10 +7,12 @@ namespace V4l2.Samples
     {
         static void Main(string[] args)
         {
-            VideoConnectionSettings settings = new VideoConnectionSettings(0)
+            VideoConnectionSettings settings = new VideoConnectionSettings(1)
             {
                 CaptureSize = (2560, 1920),
-                PixelFormat = PixelFormat.JPEG
+                PixelFormat = PixelFormat.JPEG,
+                ExposureType = ExposureType.Manual,
+                ExposureTime = 10000
             };
             using VideoDevice device = VideoDevice.Create(settings);
 
@@ -20,7 +22,7 @@ namespace V4l2.Samples
             }
             Console.WriteLine();
 
-            foreach (var item in device.GetPixelFormatResolutions(PixelFormat.YUYV))
+            foreach (var item in device.GetPixelFormatResolutions(PixelFormat.JPEG))
             {
                 Console.Write($"{item.Width}x{item.Height} ");
             }
