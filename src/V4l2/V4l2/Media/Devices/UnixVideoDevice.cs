@@ -85,6 +85,38 @@ namespace System.Device.Media
         }
 
         /// <summary>
+        /// Query controls value from the video device.
+        /// </summary>
+        /// <param name="type">The type of a video device's control.</param>
+        /// <returns>The default and current values of a video device's control.</returns>
+        public override VideoDeviceValue GetVideoDeviceValue(VideoDeviceValueType type)
+        {
+            // Get default value
+            v4l2_queryctrl query = new v4l2_queryctrl
+            {
+                id = type
+            };
+            V4l2Struct(VideoSettings.VIDIOC_QUERYCTRL, ref query);
+
+            // Get current value
+            v4l2_control ctrl = new v4l2_control
+            {
+                id = type,
+            };
+            V4l2Struct(VideoSettings.VIDIOC_G_CTRL, ref ctrl);
+
+            return new VideoDeviceValue
+            {
+                Name = type.ToString(),
+                Minimum = query.minimum,
+                Maximum = query.maximum,
+                Step = query.step,
+                DefaultValue = query.default_value,
+                CurrentValue = ctrl.value
+            };
+        }
+
+        /// <summary>
         /// Get all the pixel formats supported by the device.
         /// </summary>
         /// <returns>Supported pixel formats</returns>
@@ -241,14 +273,14 @@ namespace System.Device.Media
             // Set exposure type
             v4l2_control ctrl = new v4l2_control
             {
-                id = V4l2Control.V4L2_CID_EXPOSURE_AUTO,
+                id = VideoDeviceValueType.ExposureType,
                 value = (int)Settings.ExposureType
             };
             V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
 
             // Set exposure time
             // If exposure type is auto, this field is invalid
-            ctrl.id = V4l2Control.V4L2_CID_EXPOSURE_ABSOLUTE;
+            ctrl.id = VideoDeviceValueType.ExposureTime;
             ctrl.value = Settings.ExposureTime;
             V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
         }

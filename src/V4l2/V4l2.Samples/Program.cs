@@ -27,6 +27,9 @@ namespace V4l2.Samples
             }
             Console.WriteLine();
 
+            var value = device.GetVideoDeviceValue(VideoDeviceValueType.ExposureTime);
+            Console.WriteLine($"{value.Name} Min: {value.Minimum} Max: {value.Maximum} Step: {value.Step} Default: {value.DefaultValue} Current: {value.CurrentValue}");
+
             device.Capture("/home/pi/test.jpg");
         }
     }

@@ -36,7 +36,7 @@ namespace System.Device.Media
         /// <summary>
         /// The exposure type of video device.
         /// </summary>
-        public ExposureType ExposureType { get; set; } = ExposureType.Auto;
+        public ExposureType ExposureType { get; set; }
 
         /// <summary>
         /// The exposure time of video device.
@@ -45,6 +45,36 @@ namespace System.Device.Media
         /// If ExposureType is set to Auto, the property is invalid.
         /// Time is a relative variable. Different devices can be set in different ranges.
         /// </remarks>
-        public int ExposureTime { get; set; } = 0;
+        public int ExposureTime { get; set; }
+
+        /// <summary>
+        /// The sharpness of video device.
+        /// </summary>
+        public int Sharpness { get; set; }
+
+        /// <summary>
+        /// The contrast of video device.
+        /// </summary>
+        public int Contrast { get; set; }
+
+        /// <summary>
+        /// The brightness of video device.
+        /// </summary>
+        public int Brightness { get; set; }
+
+        /// <summary>
+        /// The saturation of video device.
+        /// </summary>
+        public int Saturation { get; set; }
+
+        /// <summary>
+        /// Whether horizontal flip the captured image.
+        /// </summary>
+        public bool HorizontalFlip { get; set; }
+
+        /// <summary>
+        /// Whether vertical flip the captured image.
+        /// </summary>
+        public bool VerticalFlip { get; set; }
     }
 }

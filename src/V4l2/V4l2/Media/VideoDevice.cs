@@ -44,6 +44,13 @@ namespace System.Device.Media
         public abstract MemoryStream Capture();
 
         /// <summary>
+        /// Query controls value from the video device.
+        /// </summary>
+        /// <param name="type">The type of a video device's control.</param>
+        /// <returns>The default and current values of a video device's control.</returns>
+        public abstract VideoDeviceValue GetVideoDeviceValue(VideoDeviceValueType type);
+
+        /// <summary>
         /// Get all the pixel formats supported by the device.
         /// </summary>
         /// <returns>Supported pixel formats</returns>

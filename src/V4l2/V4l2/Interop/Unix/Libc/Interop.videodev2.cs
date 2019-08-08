@@ -20,6 +20,7 @@ internal enum VideoSettings : int
     VIDIOC_ENUM_FRAMESIZES = -1070836150,
     VIDIOC_G_CTRL = -1073195493,
     VIDIOC_S_CTRL = -1073195492,
+    VIDIOC_QUERYCTRL = -1069263324,
 }
 
 /// <summary>
@@ -40,6 +41,7 @@ internal class RawVideoSettings
     public static int VIDIOC_STREAMOFF = Interop._IOW('V', 19, typeof(int));
     public static int VIDIOC_G_CTRL = Interop._IOWR('V', 27, typeof(v4l2_control));
     public static int VIDIOC_S_CTRL = Interop._IOWR('V', 28, typeof(v4l2_control));
+    public static int VIDIOC_QUERYCTRL = Interop._IOWR('V', 36, typeof(v4l2_queryctrl));
     public static int VIDIOC_G_INPUT = Interop._IOR('V', 38, typeof(int));
     public static int VIDIOC_S_INPUT = Interop._IOWR('V', 39, typeof(int));
     public static int VIDIOC_G_OUTPUT = Interop._IOR('V', 46, typeof(int));

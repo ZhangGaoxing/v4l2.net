@@ -3,6 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
+using System.Device.Media;
 using System.Runtime.InteropServices;
 
 internal struct V4l2FrameBuffer
@@ -26,10 +27,43 @@ internal struct v4l2_capability
     public uint[] reserved;
 }
 
+internal enum v4l2_ctrl_type : uint
+{
+    V4L2_CTRL_TYPE_INTEGER = 1,
+    V4L2_CTRL_TYPE_BOOLEAN = 2,
+    V4L2_CTRL_TYPE_MENU = 3,
+    V4L2_CTRL_TYPE_BUTTON = 4,
+    V4L2_CTRL_TYPE_INTEGER64 = 5,
+    V4L2_CTRL_TYPE_CTRL_CLASS = 6,
+    V4L2_CTRL_TYPE_STRING = 7,
+    V4L2_CTRL_TYPE_BITMASK = 8,
+    V4L2_CTRL_TYPE_INTEGER_MENU = 9,
+    V4L2_CTRL_COMPOUND_TYPES = 0x0100,
+    V4L2_CTRL_TYPE_U8 = 0x0100,
+    V4L2_CTRL_TYPE_U16 = 0x0101,
+    V4L2_CTRL_TYPE_U32 = 0x0102,
+};
+
+[StructLayout(LayoutKind.Sequential)]
+internal struct v4l2_queryctrl
+{
+    public VideoDeviceValueType id;
+    public v4l2_ctrl_type type;
+    [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 32)]
+    public string name;
+    public int minimum;
+    public int maximum;
+    public int step;
+    public int default_value;
+    public uint flags;
+    [MarshalAs(UnmanagedType.ByValArray, SizeConst = 2)]
+    public uint[] reserved;
+};
+
 [StructLayout(LayoutKind.Sequential)]
 internal struct v4l2_control
 {
-    public V4l2Control id;
+    public VideoDeviceValueType id;
     public int value;
 }
 
