@@ -68,7 +68,7 @@ namespace System.Device.Media
             byte[] dataBuffer = ProcessCaptureData();
 
             using FileStream fs = new FileStream(path, FileMode.Create);
-            fs.Write(dataBuffer);
+            fs.Write(dataBuffer, 0, dataBuffer.Length);
             fs.Flush();
         }
 
