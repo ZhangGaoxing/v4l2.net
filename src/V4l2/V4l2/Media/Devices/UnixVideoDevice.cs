@@ -1,24 +1,38 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
-using System.Text;
-using static v4l2_format;
 
 namespace System.Device.Media
 {
+    /// <summary>
+    /// Represents a communications channel to a video device running on Unix.
+    /// </summary>
     internal class UnixVideoDevice : VideoDevice
     {
-        private readonly VideoConnectionSettings _settings;
         private const string DefaultDevicePath = "/dev/video";
         private const int BufferCount = 4;
         private v4l2_capability capability;
         private int _deviceFileDescriptor = -1;
         private static readonly object s_initializationLock = new object();
 
-        public string DevicePath { get; set; }
+        /// <summary>
+        /// Path to video resources located on the platform.
+        /// </summary>
+        public override string DevicePath { get; set; }
 
-        public (uint Width, uint Height) MaxCropSize
+        /// <summary>
+        /// The connection settings of the video device.
+        /// </summary>
+        public override VideoConnectionSettings Settings { get; }
+
+        /// <summary>
+        /// The max capture size of the video device.
+        /// </summary>
+        public override (uint Width, uint Height) MaxSize
         {
             get
             {
@@ -32,43 +46,23 @@ namespace System.Device.Media
             }
         }
 
-        public (uint Width, uint Height) DefaulCroptSize
-        {
-            get
-            {
-                v4l2_cropcap cropcap = new v4l2_cropcap()
-                {
-                    type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE
-                };
-                V4l2Struct(VideoSettings.VIDIOC_CROPCAP, ref cropcap);
-
-                return (cropcap.defrect.width, cropcap.defrect.height);
-            }
-        }
-
-        public (int Left, int Top) DefaultCropPosition
-        {
-            get
-            {
-                v4l2_cropcap cropcap = new v4l2_cropcap()
-                {
-                    type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE
-                };
-                V4l2Struct(VideoSettings.VIDIOC_CROPCAP, ref cropcap);
-
-                return (cropcap.defrect.left, cropcap.defrect.top);
-            }
-        }
-
+        /// <summary>
+        /// Initializes a new instance of the <see cref="UnixVideoDevice"/> class that will use the specified settings to communicate with the video device.
+        /// </summary>
+        /// <param name="settings">The connection settings of a video device.</param>
         public UnixVideoDevice(VideoConnectionSettings settings)
         {
-            _settings = settings;
+            Settings = settings;
             DevicePath = DefaultDevicePath;
 
             Initialize();
         }
 
-        public override unsafe void Capture(string path)
+        /// <summary>
+        /// Capture a picture from the video device.
+        /// </summary>
+        /// <param name="path">Picture save path</param>
+        public override void Capture(string path)
         {
             SetCaptureSettings();
             byte[] dataBuffer = ProcessCaptureData();
@@ -78,7 +72,11 @@ namespace System.Device.Media
             fs.Flush();
         }
 
-        public override unsafe MemoryStream Capture()
+        /// <summary>
+        /// Capture a picture from the video device.
+        /// </summary>
+        /// <returns>Picture stream</returns>
+        public override MemoryStream Capture()
         {
             SetCaptureSettings();
             byte[] dataBuffer = ProcessCaptureData();
@@ -86,6 +84,10 @@ namespace System.Device.Media
             return new MemoryStream(dataBuffer);
         }
 
+        /// <summary>
+        /// Get all the pixel formats supported by the device.
+        /// </summary>
+        /// <returns>Supported pixel formats</returns>
         public override List<PixelFormat> GetSupportedPixelFormats()
         {
             v4l2_fmtdesc fmtdesc = new v4l2_fmtdesc
@@ -104,6 +106,11 @@ namespace System.Device.Media
             return result;
         }
 
+        /// <summary>
+        /// Get all the resolutions supported by the specified pixel format.
+        /// </summary>
+        /// <param name="format">Pixel format</param>
+        /// <returns>Supported resolution</returns>
         public override List<(uint Width, uint Height)> GetPixelFormatResolutions(PixelFormat format)
         {
             v4l2_frmsizeenum size = new v4l2_frmsizeenum()
@@ -193,6 +200,59 @@ namespace System.Device.Media
             return dataBuffer;
         }
 
+        private unsafe void SetCaptureSettings()
+        {
+            // Set capture format
+            v4l2_format format;
+            if (Settings.CaptureSize == (0, 0))
+            {
+                // Some cameras can't get v4l2_fmtdesc
+                // If v4l2_fmtdesc is not available, it will not be set
+                format = new v4l2_format
+                {
+                    type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                    fmt = new fmt
+                    {
+                        pix = new v4l2_pix_format
+                        {
+                            pixelformat = (uint)Settings.PixelFormat
+                        }
+                    }
+                };
+            }
+            else
+            {
+                format = new v4l2_format
+                {
+                    type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                    fmt = new fmt
+                    {
+                        pix = new v4l2_pix_format
+                        {
+                            width = Settings.CaptureSize.Width,
+                            height = Settings.CaptureSize.Height,
+                            pixelformat = (uint)Settings.PixelFormat
+                        }
+                    }
+                };
+            }
+            V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
+
+            // Set exposure type
+            v4l2_control ctrl = new v4l2_control
+            {
+                id = V4l2Control.V4L2_CID_EXPOSURE_AUTO,
+                value = (int)Settings.ExposureType
+            };
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set exposure time
+            // If exposure type is auto, this field is invalid
+            ctrl.id = V4l2Control.V4L2_CID_EXPOSURE_ABSOLUTE;
+            ctrl.value = Settings.ExposureTime;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+        }
+
         private void Initialize()
         {
             if (_deviceFileDescriptor >= 0)
@@ -200,7 +260,7 @@ namespace System.Device.Media
                 return;
             }
 
-            string deviceFileName = $"{DevicePath}{_settings.BusId}";
+            string deviceFileName = $"{DevicePath}{Settings.BusId}";
             lock (s_initializationLock)
             {
                 if (_deviceFileDescriptor >= 0)
@@ -219,59 +279,13 @@ namespace System.Device.Media
             }
         }
 
-        private unsafe void SetCaptureSettings()
-        {
-            // Set capture format
-            v4l2_format format;
-            if (_settings.CaptureSize == (0, 0))
-            {
-                // Some cameras can't get v4l2_fmtdesc
-                // If v4l2_fmtdesc is not available, it will not be set
-                format = new v4l2_format
-                {
-                    type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                    fmt = new fmt
-                    {
-                        pix = new v4l2_pix_format
-                        {
-                            pixelformat = (uint)_settings.PixelFormat
-                        }
-                    }
-                };
-            }
-            else
-            {
-                format = new v4l2_format
-                {
-                    type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                    fmt = new fmt
-                    {
-                        pix = new v4l2_pix_format
-                        {
-                            width = _settings.CaptureSize.Width,
-                            height = _settings.CaptureSize.Height,
-                            pixelformat = (uint)_settings.PixelFormat
-                        }
-                    }
-                };
-            }
-            V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
-
-            // Set exposure type
-            v4l2_control ctrl = new v4l2_control
-            {
-                id = V4l2Control.V4L2_CID_EXPOSURE_AUTO,
-                value = (int)_settings.ExposureType
-            };
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
-
-            // Set exposure time
-            // If exposure type is auto, this field is invalid
-            ctrl.id = V4l2Control.V4L2_CID_EXPOSURE_ABSOLUTE;
-            ctrl.value = _settings.ExposureTime;
-            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
-        }
-
+        /// <summary>
+        /// Get and set v4l2 struct.
+        /// </summary>
+        /// <typeparam name="T">V4L2 struct</typeparam>
+        /// <param name="request">V4L2 request value</param>
+        /// <param name="struct">The struct need to be read or set</param>
+        /// <returns>The ioctl result</returns>
         private int V4l2Struct<T>(VideoSettings request, ref T @struct)
             where T : struct
         {
