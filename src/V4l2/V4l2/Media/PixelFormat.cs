@@ -4,7 +4,7 @@
 
 using System.Reflection;
 
-namespace System.Device.Media
+namespace Iot.Device.Media
 {
     /// <summary>
     /// The pixel format of a video device.

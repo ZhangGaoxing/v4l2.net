@@ -3,7 +3,7 @@
 // See the LICENSE file in the project root for more information.
 
 using System;
-using System.Device.Media;
+using Iot.Device.Media;
 using System.Runtime.InteropServices;
 
 internal struct V4l2FrameBuffer

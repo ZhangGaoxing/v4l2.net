@@ -2,11 +2,12 @@
 // The .NET Foundation licenses this file to you under the MIT license.
 // See the LICENSE file in the project root for more information.
 
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
 
-namespace System.Device.Media
+namespace Iot.Device.Media
 {
     /// <summary>
     /// Represents a communications channel to a video device running on Unix.
@@ -15,7 +16,6 @@ namespace System.Device.Media
     {
         private const string DefaultDevicePath = "/dev/video";
         private const int BufferCount = 4;
-        private v4l2_capability capability;
         private int _deviceFileDescriptor = -1;
         private static readonly object s_initializationLock = new object();
 
@@ -381,9 +381,6 @@ namespace System.Device.Media
                 {
                     throw new IOException($"Error {Marshal.GetLastWin32Error()}. Can not open video device file '{deviceFileName}'.");
                 }
-
-                v4l2_capability capability = new v4l2_capability();
-                V4l2Struct(VideoSettings.VIDIOC_QUERYCAP, ref capability);
             }
         }
 

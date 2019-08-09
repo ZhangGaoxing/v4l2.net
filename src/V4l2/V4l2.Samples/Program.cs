@@ -1,5 +1,5 @@
 ﻿using System;
-using System.Device.Media;
+using Iot.Device.Media;
 
 namespace V4l2.Samples
 {
