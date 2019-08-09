@@ -148,7 +148,7 @@ namespace Iot.Device.Media
             v4l2_frmsizeenum size = new v4l2_frmsizeenum()
             {
                 index = 0,
-                pixel_format = (uint)format
+                pixel_format = format
             };
 
             List<(uint Width, uint Height)> result = new List<(uint Width, uint Height)>();
@@ -237,41 +237,20 @@ namespace Iot.Device.Media
             FillVideoConnectionSettings();
 
             // Set capture format
-            v4l2_format format;
-            if (Settings.CaptureSize == (0, 0))
+            v4l2_format format = new v4l2_format
             {
-                // Some cameras can't get v4l2_fmtdesc
-                // If v4l2_fmtdesc is not available, it will not be set
-                format = new v4l2_format
+                type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
+                fmt = new fmt
                 {
-                    type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                    fmt = new fmt
+                    pix = new v4l2_pix_format
                     {
-                        pix = new v4l2_pix_format
-                        {
-                            pixelformat = (uint)Settings.PixelFormat
-                        }
+                        width = Settings.CaptureSize.Width,
+                        height = Settings.CaptureSize.Height,
+                        pixelformat = Settings.PixelFormat
                     }
-                };
-            }
-            else
-            {
-                format = new v4l2_format
-                {
-                    type = v4l2_buf_type.V4L2_BUF_TYPE_VIDEO_CAPTURE,
-                    fmt = new fmt
-                    {
-                        pix = new v4l2_pix_format
-                        {
-                            width = Settings.CaptureSize.Width,
-                            height = Settings.CaptureSize.Height,
-                            pixelformat = (uint)Settings.PixelFormat
-                        }
-                    }
-                };
-            }
+                }
+            };
             V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
-
             
             // Set exposure type
             v4l2_control ctrl = new v4l2_control
@@ -307,6 +286,46 @@ namespace Iot.Device.Media
             ctrl.value = Settings.Sharpness;
             V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
 
+            // Set gain
+            ctrl.id = VideoDeviceValueType.Gain;
+            ctrl.value = Settings.Gain;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set gamma
+            ctrl.id = VideoDeviceValueType.Gamma;
+            ctrl.value = Settings.Gamma;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set power line frequency
+            ctrl.id = VideoDeviceValueType.PowerLineFrequency;
+            ctrl.value = (int)Settings.PowerLineFrequency;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set white balance effect
+            ctrl.id = VideoDeviceValueType.WhiteBalanceEffect;
+            ctrl.value = (int)Settings.WhiteBalanceEffect;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set white balance temperature
+            ctrl.id = VideoDeviceValueType.WhiteBalanceTemperature;
+            ctrl.value = Settings.WhiteBalanceTemperature;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set color effect
+            ctrl.id = VideoDeviceValueType.ColorEffect;
+            ctrl.value = (int)Settings.ColorEffect;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set scene mode
+            ctrl.id = VideoDeviceValueType.SceneMode;
+            ctrl.value = (int)Settings.SceneMode;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
+            // Set rotate
+            ctrl.id = VideoDeviceValueType.Rotate;
+            ctrl.value = Settings.Rotate;
+            V4l2Struct(VideoSettings.VIDIOC_S_CTRL, ref ctrl);
+
             // Set horizontal flip
             ctrl.id = VideoDeviceValueType.HorizontalFlip;
             ctrl.value = Settings.HorizontalFlip ? 1 : 0;
@@ -320,6 +339,11 @@ namespace Iot.Device.Media
 
         private void FillVideoConnectionSettings()
         {
+            if (Settings.CaptureSize.Equals(default))
+            {
+                Settings.CaptureSize = MaxSize;
+            }
+
             if (Settings.ExposureType.Equals(default))
             {
                 Settings.ExposureType = (ExposureType)GetVideoDeviceValue(VideoDeviceValueType.ExposureType).DefaultValue;
@@ -348,6 +372,46 @@ namespace Iot.Device.Media
             if (Settings.Contrast.Equals(default))
             {
                 Settings.Contrast = GetVideoDeviceValue(VideoDeviceValueType.Contrast).DefaultValue;
+            }
+
+            if (Settings.Gain.Equals(default))
+            {
+                Settings.Gain = GetVideoDeviceValue(VideoDeviceValueType.Gain).DefaultValue;
+            }
+
+            if (Settings.Gamma.Equals(default))
+            {
+                Settings.Gamma = GetVideoDeviceValue(VideoDeviceValueType.Gamma).DefaultValue;
+            }
+
+            if (Settings.Rotate.Equals(default))
+            {
+                Settings.Rotate = GetVideoDeviceValue(VideoDeviceValueType.Rotate).DefaultValue;
+            }
+
+            if (Settings.WhiteBalanceTemperature.Equals(default))
+            {
+                Settings.WhiteBalanceTemperature = GetVideoDeviceValue(VideoDeviceValueType.WhiteBalanceTemperature).DefaultValue;
+            }
+
+            if (Settings.ColorEffect.Equals(default))
+            {
+                Settings.ColorEffect = (ColorEffect)GetVideoDeviceValue(VideoDeviceValueType.ColorEffect).DefaultValue;
+            }
+
+            if (Settings.PowerLineFrequency.Equals(default))
+            {
+                Settings.PowerLineFrequency = (PowerLineFrequency)GetVideoDeviceValue(VideoDeviceValueType.PowerLineFrequency).DefaultValue;
+            }
+
+            if (Settings.SceneMode.Equals(default))
+            {
+                Settings.SceneMode = (SceneMode)GetVideoDeviceValue(VideoDeviceValueType.SceneMode).DefaultValue;
+            }
+
+            if (Settings.WhiteBalanceEffect.Equals(default))
+            {
+                Settings.WhiteBalanceEffect = (WhiteBalanceEffect)GetVideoDeviceValue(VideoDeviceValueType.WhiteBalanceEffect).DefaultValue;
             }
 
             if (Settings.HorizontalFlip.Equals(default))

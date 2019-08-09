@@ -12,6 +12,9 @@ namespace V4l2.Samples
                 CaptureSize = (2560, 1920),
                 PixelFormat = PixelFormat.JPEG,
                 ExposureType = ExposureType.Auto,
+                Rotate = 180,
+                ColorEffect = ColorEffect.Negative,
+                WhiteBalanceEffect = WhiteBalanceEffect.Shade
             };
             using VideoDevice device = VideoDevice.Create(settings);
 
@@ -30,7 +33,7 @@ namespace V4l2.Samples
             Console.WriteLine();
 
             // Query v4l2 controls default and current value
-            var value = device.GetVideoDeviceValue(VideoDeviceValueType.ExposureTime);
+            var value = device.GetVideoDeviceValue(VideoDeviceValueType.Rotate);
             Console.WriteLine($"{value.Name} Min: {value.Minimum} Max: {value.Maximum} Step: {value.Step} Default: {value.DefaultValue} Current: {value.CurrentValue}");
 
             // Capture static image
