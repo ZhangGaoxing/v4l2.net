@@ -65,8 +65,10 @@ namespace Iot.Device.Media
         /// <param name="path">Picture save path</param>
         public override void Capture(string path)
         {
+            Initialize();
             SetVideoConnectionSettings();
             byte[] dataBuffer = ProcessCaptureData();
+            Close();
 
             using FileStream fs = new FileStream(path, FileMode.Create);
             fs.Write(dataBuffer, 0, dataBuffer.Length);
@@ -79,8 +81,10 @@ namespace Iot.Device.Media
         /// <returns>Picture stream</returns>
         public override MemoryStream Capture()
         {
+            Initialize();
             SetVideoConnectionSettings();
             byte[] dataBuffer = ProcessCaptureData();
+            Close();
 
             return new MemoryStream(dataBuffer);
         }
@@ -448,6 +452,15 @@ namespace Iot.Device.Media
             }
         }
 
+        private void Close()
+        {
+            if (_deviceFileDescriptor >= 0)
+            {
+                Interop.close(_deviceFileDescriptor);
+                _deviceFileDescriptor = -1;
+            }
+        }
+
         /// <summary>
         /// Get and set v4l2 struct.
         /// </summary>
@@ -469,11 +482,7 @@ namespace Iot.Device.Media
 
         protected override void Dispose(bool disposing)
         {
-            if (_deviceFileDescriptor >= 0)
-            {
-                Interop.close(_deviceFileDescriptor);
-                _deviceFileDescriptor = -1;
-            }
+            Close();
 
             base.Dispose(disposing);
         }
