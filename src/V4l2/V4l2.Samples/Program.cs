@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Drawing;
 using Iot.Device.Media;
 
 namespace V4l2.Samples
@@ -9,12 +11,9 @@ namespace V4l2.Samples
         {
             VideoConnectionSettings settings = new VideoConnectionSettings(0)
             {
-                CaptureSize = (2560, 1920),
+                CaptureSize = (1024, 768),
                 PixelFormat = PixelFormat.JPEG,
-                ExposureType = ExposureType.Auto,
-                Rotate = 180,
-                ColorEffect = ColorEffect.Negative,
-                WhiteBalanceEffect = WhiteBalanceEffect.Shade
+                ExposureType = ExposureType.Auto
             };
             using VideoDevice device = VideoDevice.Create(settings);
 
@@ -26,7 +25,7 @@ namespace V4l2.Samples
             Console.WriteLine();
 
             // Get the resolutions of the format
-            foreach (var item in device.GetPixelFormatResolutions(PixelFormat.JPEG))
+            foreach (var item in device.GetPixelFormatResolutions(PixelFormat.YUYV))
             {
                 Console.Write($"{item.Width}x{item.Height} ");
             }
@@ -37,13 +36,15 @@ namespace V4l2.Samples
             Console.WriteLine($"{value.Name} Min: {value.Minimum} Max: {value.Maximum} Step: {value.Step} Default: {value.DefaultValue} Current: {value.CurrentValue}");
 
             // Capture static image
-            device.Capture("/home/pi/test1.jpg");
+            device.Capture("/home/pi/jpg_direct_output.jpg");
 
             // Change capture setting
-            device.Settings.HorizontalFlip = true;
+            device.Settings.PixelFormat = PixelFormat.YUV420;
 
-            // Capture static image
-            device.Capture("/home/pi/test2.jpg");
+            // Convert pixel format
+            Color[] colors = VideoDevice.Yv12ToRgb(device.Capture(), settings.CaptureSize);
+            Bitmap bitmap = VideoDevice.RgbToBitmap(settings.CaptureSize, colors);
+            bitmap.Save("/home/pi/yuyv_to_jpg.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
         }
     }
 }

@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Threading;
 
 namespace Iot.Device.Media
 {
@@ -235,7 +236,6 @@ namespace Iot.Device.Media
         private unsafe void SetVideoConnectionSettings()
         {
             FillVideoConnectionSettings();
-
             // Set capture format
             v4l2_format format = new v4l2_format
             {
@@ -250,8 +250,8 @@ namespace Iot.Device.Media
                     }
                 }
             };
-            V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
-            
+            var res = V4l2Struct(VideoSettings.VIDIOC_S_FMT, ref format);
+
             // Set exposure type
             v4l2_control ctrl = new v4l2_control
             {

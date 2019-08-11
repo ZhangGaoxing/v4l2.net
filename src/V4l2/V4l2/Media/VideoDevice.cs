@@ -8,7 +8,7 @@ using System.IO;
 
 namespace Iot.Device.Media
 {
-    public abstract class VideoDevice : IDisposable
+    public abstract partial class VideoDevice : IDisposable
     {
         /// <summary>
         /// Creates a communications channel to a video device running on Unix.
