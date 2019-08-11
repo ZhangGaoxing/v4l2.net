@@ -1,23 +1,20 @@
-﻿using System;
+﻿// Licensed to the .NET Foundation under one or more agreements.
+// The .NET Foundation licenses this file to you under the MIT license.
+// See the LICENSE file in the project root for more information.
+
 using System.Collections.Generic;
 using System.Drawing;
-using System.Drawing.Imaging;
 using System.IO;
-using System.Text;
 
 namespace Iot.Device.Media
 {
     public abstract partial class VideoDevice
     {
-        private static Color YuvToRgb(int y, int u, int v)
-        {
-            byte r = (byte)(y + 1.4075 * (v - 128));
-            byte g = (byte)(y - 0.3455 * (u - 128) - (0.7169 * (v - 128)));
-            byte b = (byte)(y + 1.7790 * (u - 128));
-
-            return Color.FromArgb(r, g, b);
-        }
-
+        /// <summary>
+        /// Convert YUV(YUV444) to RGB format.
+        /// </summary>
+        /// <param name="stream">YUV stream.</param>
+        /// <returns>RGB format colors.</returns>
         public static Color[] YuvToRgb(MemoryStream stream)
         {
             int y, u, v;
@@ -35,6 +32,11 @@ namespace Iot.Device.Media
             return colors.ToArray();
         }
 
+        /// <summary>
+        /// Convert YUYV(YUV422) to RGB format.
+        /// </summary>
+        /// <param name="stream">YUYV stream.</param>
+        /// <returns>RGB format colors.</returns>
         public static Color[] YuyvToRgb(MemoryStream stream)
         {
             int y0, u, y1, v;
@@ -54,6 +56,12 @@ namespace Iot.Device.Media
             return colors.ToArray();
         }
 
+        /// <summary>
+        /// Convert YV12(YUV420) to RGB format.
+        /// </summary>
+        /// <param name="stream">YV12 stream.</param>
+        /// <param name="size">Image size in the stream.</param>
+        /// <returns>RGB format colors.</returns>
         public static Color[] Yv12ToRgb(MemoryStream stream, (uint Width, uint Height) size)
         {
             int y0, u, v;
@@ -62,7 +70,7 @@ namespace Iot.Device.Media
             int shift, vShift = total / 4;
 
             byte[] yuv = stream.ToArray();
-            
+
             List<Color> colors = new List<Color>();
             for (int y = 0; y < height; y++)
             {
@@ -81,6 +89,12 @@ namespace Iot.Device.Media
             return colors.ToArray();
         }
 
+        /// <summary>
+        /// Convert NV12(YUV420) to RGB format.
+        /// </summary>
+        /// <param name="stream">NV12 stream.</param>
+        /// <param name="size">Image size in the stream.</param>
+        /// <returns>RGB format colors.</returns>
         public static Color[] Nv12ToRgb(MemoryStream stream, (uint Width, uint Height) size)
         {
             int y0, u, v;
@@ -108,6 +122,13 @@ namespace Iot.Device.Media
             return colors.ToArray();
         }
 
+        /// <summary>
+        /// Convert RGB format to bitmap
+        /// </summary>
+        /// <param name="size">Image size in the RGB data.</param>
+        /// <param name="colors">RGB data.</param>
+        /// <param name="format">Bitmap pixel format</param>
+        /// <returns>Bitmap</returns>
         public static Bitmap RgbToBitmap((uint Width, uint Height) size, Color[] colors, System.Drawing.Imaging.PixelFormat format = System.Drawing.Imaging.PixelFormat.Format24bppRgb)
         {
             int width = (int)size.Width, height = (int)size.Height;
@@ -123,6 +144,22 @@ namespace Iot.Device.Media
             }
 
             return pic;
+        }
+
+        /// <summary>
+        /// Convert single YUV pixel to RGB color.
+        /// </summary>
+        /// <param name="y">Y</param>
+        /// <param name="u">U</param>
+        /// <param name="v">V</param>
+        /// <returns>RGB color.</returns>
+        private static Color YuvToRgb(int y, int u, int v)
+        {
+            byte r = (byte)(y + 1.4075 * (v - 128));
+            byte g = (byte)(y - 0.3455 * (u - 128) - (0.7169 * (v - 128)));
+            byte b = (byte)(y + 1.7790 * (u - 128));
+
+            return Color.FromArgb(r, g, b);
         }
     }
 }
