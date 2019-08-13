@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Drawing;
+using System.Threading;
+using System.Threading.Tasks;
 using Iot.Device.Media;
 
 namespace V4l2.Samples
 {
     class Program
     {
-        static void Main(string[] args)
+        static async Task Main(string[] args)
         {
             VideoConnectionSettings settings = new VideoConnectionSettings(0)
             {
-                CaptureSize = (1024, 768),
+                CaptureSize = (2560, 1920),
                 PixelFormat = PixelFormat.JPEG,
                 ExposureType = ExposureType.Auto
             };
@@ -34,14 +36,13 @@ namespace V4l2.Samples
             var value = device.GetVideoDeviceValue(VideoDeviceValueType.Rotate);
             Console.WriteLine($"{value.Name} Min: {value.Minimum} Max: {value.Maximum} Step: {value.Step} Default: {value.DefaultValue} Current: {value.CurrentValue}");
 
-            // Capture static image
-            device.Capture("/home/pi/jpg_direct_output.jpg");
+            await device.CaptureAsync("/home/pi/jpg_direct_output.jpg");
 
             // Change capture setting
             device.Settings.PixelFormat = PixelFormat.YUV420;
 
             // Convert pixel format
-            Color[] colors = VideoDevice.Yv12ToRgb(device.Capture(), settings.CaptureSize);
+            Color[] colors = VideoDevice.Yv12ToRgb(await device.CaptureAsync(), settings.CaptureSize);
             Bitmap bitmap = VideoDevice.RgbToBitmap(settings.CaptureSize, colors);
             bitmap.Save("/home/pi/yuyv_to_jpg.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
         }
