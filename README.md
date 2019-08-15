@@ -10,7 +10,7 @@ sudo apt-get update
 sudo apt-get install v4l-utils
 ```
 
-1. First you need to create a `VideoConnectionSettings` and set the parameters for shooting.
+1. First you need to create a `VideoConnectionSettings` and set the parameters for capture.
     ```C#
     VideoConnectionSettings settings = new VideoConnectionSettings(busId: 0)
     {
