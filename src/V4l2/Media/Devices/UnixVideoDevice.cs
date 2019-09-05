@@ -60,6 +60,14 @@ namespace Iot.Device.Media
             Initialize();
         }
 
+        public void Video()
+        {
+            Interop.avdevice_register_all();
+            Interop.avcodec_register_all();
+            Interop.av_register_all();
+
+        }
+
         /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
