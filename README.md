@@ -1,5 +1,5 @@
 # v4l2.net
-V4L2 tool implemented by .NET Core. The required minimum version of .NET Core is 2.1. Theoretically support all Linux devices running .NET Core (.NET Core JIT depends on ARMv7 instructions).
+Video for Linux version 2 implemented by .NET Core. The required minimum version of .NET Core is 2.1. Theoretically support all Linux devices running .NET Core (.NET Core JIT depends on ARMv7 instructions).
 
 [dotnet/iot#664](https://github.com/dotnet/iot/pull/664)
 
