@@ -1,15 +1,19 @@
-# v4l2.net
-Video for Linux version 2 implemented by .NET Core. The required minimum version of .NET Core is 2.1. Theoretically support all Linux devices running .NET Core (.NET Core JIT depends on ARMv7 instructions).
+# V4L2.NET
+V4L2 (Video for Linux version 2) implemented by .NET Core. The required minimum version of .NET Core is 2.1. Theoretically support all Linux devices running .NET Core (.NET Core JIT depends on ARMv7 instructions).
 
 [dotnet/iot#664](https://github.com/dotnet/iot/pull/664)
 
-## Getting Started
-Before that, please make sure you install `v4l-utils`.
-```
-sudo apt-get update
-sudo apt-get install v4l-utils
-```
+## Install Dependencies
+1. Install `v4l-utils`.
+    ```
+    sudo apt-get install v4l-utils
+    ```
+2. Install `System.Drawing` native dependencies.
+    ```
+    sudo apt-get install libc6-dev libgdiplus libx11-dev
+    ```
 
+## Getting Started
 1. Create a `VideoConnectionSettings` and set the parameters for capture.
     ```C#
     VideoConnectionSettings settings = new VideoConnectionSettings(busId: 0)
@@ -26,13 +30,13 @@ sudo apt-get install v4l-utils
 3. Capture static image
     ```C#
     // Capture static image
-    await device.CaptureAsync("/home/pi/jpg_direct_output.jpg");
+    device.Capture("/home/pi/jpg_direct_output.jpg");
 
     // Change capture setting
     device.Settings.PixelFormat = PixelFormat.YUV420;
 
     // Get image stream, convert pixel format and save to file
-    MemoryStream ms = await device.CaptureAsync();
+    MemoryStream ms = device.Capture();
     Color[] colors = VideoDevice.Yv12ToRgb(ms, settings.CaptureSize);
     Bitmap bitmap = VideoDevice.RgbToBitmap(settings.CaptureSize, colors);
     bitmap.Save("/home/pi/yuyv_to_jpg.jpg", System.Drawing.Imaging.ImageFormat.Jpeg);
