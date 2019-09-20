@@ -5,11 +5,12 @@
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Threading;
-using System.Threading.Tasks;
 
 namespace Iot.Device.Media
 {
+    /// <summary>
+    /// The communications channel to a video device.
+    /// </summary>
     public abstract partial class VideoDevice : IDisposable
     {
         /// <summary>
@@ -37,28 +38,14 @@ namespace Iot.Device.Media
         /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
-        /// <param name="path">Picture save path</param>
-        public abstract Task CaptureAsync(string path);
+        /// <param name="path">Picture save path.</param>
+        public abstract void Capture(string path);
 
         /// <summary>
         /// Capture a picture from the video device.
         /// </summary>
-        /// <param name="path">Picture save path</param>
-        /// <param name="token"> A cancellation token that can be used to cancel the work</param>
-        public abstract Task CaptureAsync(string path, CancellationToken token);
-
-        /// <summary>
-        /// Capture a picture from the video device.
-        /// </summary>
-        /// <returns>Picture stream</returns>
-        public abstract Task<MemoryStream> CaptureAsync();
-
-        /// <summary>
-        /// Capture a picture from the video device.
-        /// </summary>
-        /// <returns>Picture stream</returns>
-        /// <param name="token"> A cancellation token that can be used to cancel the work</param>
-        public abstract Task<MemoryStream> CaptureAsync(CancellationToken token);
+        /// <returns>Picture stream.</returns>
+        public abstract MemoryStream Capture();
 
         /// <summary>
         /// Query controls value from the video device.
@@ -70,22 +57,27 @@ namespace Iot.Device.Media
         /// <summary>
         /// Get all the pixel formats supported by the device.
         /// </summary>
-        /// <returns>Supported pixel formats</returns>
+        /// <returns>Supported pixel formats.</returns>
         public abstract IEnumerable<PixelFormat> GetSupportedPixelFormats();
 
         /// <summary>
         /// Get all the resolutions supported by the specified pixel format.
         /// </summary>
-        /// <param name="format">Pixel format</param>
-        /// <returns>Supported resolution</returns>
+        /// <param name="format">Pixel format.</param>
+        /// <returns>Supported resolution.</returns>
         public abstract IEnumerable<(uint Width, uint Height)> GetPixelFormatResolutions(PixelFormat format);
 
+        /// <inheritdoc/>
         public void Dispose()
         {
             Dispose(true);
             GC.SuppressFinalize(this);
         }
 
+        /// <summary>
+        /// Releases the unmanaged resources used by the VideoDevice and optionally releases the managed resources.
+        /// </summary>
+        /// <param name="disposing">True to release both managed and unmanaged resources; false to release only unmanaged resources.</param>
         protected virtual void Dispose(bool disposing) { }
     }
 }
